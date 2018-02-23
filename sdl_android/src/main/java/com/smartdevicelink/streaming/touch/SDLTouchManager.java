@@ -1,7 +1,5 @@
 package com.smartdevicelink.streaming.touch;
 
-import android.view.View;
-
 import com.smartdevicelink.proxy.rpc.OnTouchEvent;
 import com.smartdevicelink.proxy.rpc.TouchCoord;
 import com.smartdevicelink.proxy.rpc.TouchEvent;
@@ -16,91 +14,9 @@ import java.util.TimerTask;
 
 public class SDLTouchManager {
 
-    SDLTouchManagerDelegate mCallback;
+    SDLTouchManagerListener mCallback;
 
-    public interface SDLTouchManagerDelegate {
-        /**
-         * A single tap was received
-         *
-         * @param view The view find by the Hit tester.
-         *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-         * @param Point The point where single tap is occurred.
-         */
-        void didReceiveSingleTap(View view, TouchCoord Point);
-
-        /**
-         * A double tap was received
-         *
-         * @param view The view find by the Hit tester.
-         *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-         * @param Point The point where double tap is occurred. It is avarage of the taps.
-         */
-        void didReceiveDoubleTap(View view, TouchCoord Point);
-
-        /**
-         * A panning action is received. It will be updated once the
-         *
-         * @param view The view find by the Hit tester.
-         *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-         * @param toPoint It is the previous point where pan is started.
-         * @param fromPoint It is the new point for panning action.
-         *
-         */
-        void didReceivePanning(View view, TouchCoord fromPoint, TouchCoord toPoint);
-
-        /**
-         * Pinch moved and changed scale
-         *
-         * @param view The view find by the Hit tester.
-         *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-         * @param Point Center point of the pinch in the head unit's coordinate system
-         */
-        void didReceivePinch(View view, TouchCoord Point, double Scale);
-
-        /**
-         * Panning started
-         *
-         * @param Point Location of the panning start point in the head unit's coordinate system.
-         */
-        void panningDidStart(View view, TouchCoord Point);
-
-        /**
-         * Panning ended
-         *
-         * @param view The view find by the Hit tester.
-         *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-         * @param Point Location of the panning's end point in the head unit's coordinate system
-         */
-        void panningDidEnd(View view, TouchCoord Point);
-
-        /**
-         * Panning canceled
-         *
-         * @param Point Location of the panning's end point in the head unit's coordinate system
-         */
-        void panningCanceled(TouchCoord Point);
-
-
-        void pinchDidStart(View view, TouchCoord Point);
-
-        /**
-         * Pinch did end
-         *
-         * @param view The view find by the Hit tester.
-         *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-         * @param Point Center point of the pinch in the head unit's coordinate system
-         */
-        void pinchDidEnd(View view, TouchCoord Point);
-
-        /**
-         * Pinch canceled
-         *
-         * @param Point Center point of the pinch in the head unit's coordinate system
-         */
-        void pinchCanceled(TouchCoord Point);
-    }
-
-    public void setSDLTouchManagerDelegate(SDLTouchManagerDelegate callback){
+    public void setSDLTouchManagerDelegate(SDLTouchManagerListener callback){
         this.mCallback = callback;
     }
 
@@ -156,7 +72,7 @@ public class SDLTouchManager {
                 if ((storedTouchLocation == notifiedTouchLocation) || (storedTouchLocation==null) || (notifiedTouchLocation==null)){
                     return;
                 }
-                mCallback.didReceivePanning(null, notifiedTouchLocation,storedTouchLocation);
+                mCallback.onPanningReceive(null, notifiedTouchLocation,storedTouchLocation);
                 lastNotifiedTouchLocation=storedTouchLocation;
                 break;
 
@@ -165,7 +81,7 @@ public class SDLTouchManager {
                     return;
                 }
                 double scale = currentPinchGesture.getDistance()/previousPinchDistance;
-                mCallback.didReceivePinch(null, currentPinchGesture.getCenter(), scale);
+                mCallback.onPinchReceive(null, currentPinchGesture.getCenter(), scale);
                 break;
 
         }
@@ -223,7 +139,7 @@ public class SDLTouchManager {
                 currentPinchGesture = new SDLPinchGesture(previousTouch,touch);
                 previousPinchDistance = currentPinchGesture.getDistance();
                 //TODO: Add UI Hit tester here
-                mCallback.pinchDidStart(null, currentPinchGesture.getCenter());
+                mCallback.onPinchStart(null, currentPinchGesture.getCenter());
                 break;
         }
 
@@ -263,7 +179,7 @@ public class SDLTouchManager {
 
                 performingTouchType= SDLPerformingTouchType.SDLPerformingTouchTypePanningTouch;
                 //TODO: Add UI Hit tester here
-                mCallback.panningDidStart(null, currentPinchGesture.getCenter());
+                mCallback.onPaningStart(null, currentPinchGesture.getCenter());
                 break;
 
             case SDLPerformingTouchTypePanningTouch:
@@ -295,14 +211,14 @@ public class SDLTouchManager {
                 sdl_setMultiTouchFingerTouchForTouch(touchEvent);
                 if (currentPinchGesture.isValid()) {
                     //TODO: Add UI Hit tester here
-                    mCallback.pinchDidEnd(null, currentPinchGesture.getCenter());
+                    mCallback.onPinchEnd(null, currentPinchGesture.getCenter());
                 }
                 currentPinchGesture = null;
                 break;
 
             case SDLPerformingTouchTypePanningTouch:
                 //TODO: Add UI Hit tester here
-                mCallback.panningDidEnd(null, currentTouchCoord);
+                mCallback.onPanningEnd(null, currentTouchCoord);
                 lastStoredTouchLocation = null;
                 lastNotifiedTouchLocation = null;
                 break;
@@ -325,8 +241,8 @@ public class SDLTouchManager {
                         //TODO: Add UI Hit tester here
                         TouchCoord center = new TouchCoord();
                         center.setX((firstTap.getX() + secondTap.getX())/2);
-                        center.setY((firstTap.getX() + secondTap.getX())/2);
-                        mCallback.didReceiveDoubleTap(null, center);
+                        center.setY((firstTap.getY() + secondTap.getY())/2);
+                        mCallback.onDoubleTapReceive(null, center);
                     }
 
                     singleTapTouchEvent = null;
@@ -361,13 +277,13 @@ public class SDLTouchManager {
                 sdl_setMultiTouchFingerTouchForTouch(touchEvent);
                 if (currentPinchGesture.isValid()) {
                     //TODO: Add UI Hit tester here
-                    mCallback.pinchCanceled(currentPinchGesture.getCenter());
+                    mCallback.onPinchCanceled(currentPinchGesture.getCenter());
                 }
                 currentPinchGesture = null;
                 break;
 
             case SDLPerformingTouchTypePanningTouch:
-                mCallback.panningCanceled(touchEvent.getTouchCoordinates().get(0));
+                mCallback.onPanningCanceled(touchEvent.getTouchCoordinates().get(0));
                 break;
 
             case SDLPerformingTouchTypeSingleTouch: //Fallthrough
@@ -407,7 +323,7 @@ public class SDLTouchManager {
             @Override
             public void run() {
                 //TODO: Add UI Hit tester here
-                mCallback.didReceiveSingleTap(null, point);
+                mCallback.onSingleTapReceive(null, point);
                 singleTapTouchEvent = null;
             }
         }, tapTimeThreshold);
