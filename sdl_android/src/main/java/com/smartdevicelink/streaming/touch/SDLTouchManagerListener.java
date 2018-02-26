@@ -14,18 +14,18 @@ public interface SDLTouchManagerListener {
      *
      * @param view The view find by the Hit tester.
      *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-     * @param Point The point where single tap is occurred.
+     * @param point The point where single tap is occurred.
      */
-    void onSingleTapReceive(View view, TouchCoord Point);
+    void onSingleTapReceive(View view, TouchCoord point);
 
     /**
      * A double tap was received
      *
      * @param view The view find by the Hit tester.
      *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-     * @param Point The point where double tap is occurred. It is avarage of the taps.
+     * @param point The point where double tap is occurred. It is avarage of the taps.
      */
-    void onDoubleTapReceive(View view, TouchCoord Point);
+    void onDoubleTapReceive(View view, TouchCoord point);
 
     /**
      * A panning action is received. It will be updated once the
@@ -43,53 +43,53 @@ public interface SDLTouchManagerListener {
      *
      * @param view The view find by the Hit tester.
      *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-     * @param Point Center point of the pinch in the head unit's coordinate system
+     * @param soint Center point of the pinch in the head unit's coordinate system
      */
-    void onPinchReceive(View view, TouchCoord Point, double Scale);
+    void onPinchReceive(View view, TouchCoord soint, double scale);
 
     /**
      * Panning started
      *
-     * @param Point Location of the panning start point in the head unit's coordinate system.
+     * @param point Location of the panning start point in the head unit's coordinate system.
      */
-    void onPaningStart(View view, TouchCoord Point);
+    void onPaningStart(View view, TouchCoord point);
 
     /**
      * Panning ended
      *
      * @param view The view find by the Hit tester.
      *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-     * @param Point Location of the panning's end point in the head unit's coordinate system
+     * @param point Location of the panning's end point in the head unit's coordinate system
      */
-    void onPanningEnd(View view, TouchCoord Point);
+    void onPanningEnd(View view, TouchCoord point);
 
     /**
      * Panning canceled
      *
-     * @param Point Location of the panning's end point in the head unit's coordinate system
+     * @param point Location of the panning's end point in the head unit's coordinate system
      */
-    void onPanningCanceled(TouchCoord Point);
+    void onPanningCanceled(TouchCoord point);
 
     /**
      * Pinch did start
      *
-     * @param Point Center point of the pinch start point in the head unit's coordinate system.
+     * @param point Center point of the pinch start point in the head unit's coordinate system.
      */
-    void onPinchStart(View view, TouchCoord Point);
+    void onPinchStart(View view, TouchCoord point);
 
     /**
      * Pinch did end
      *
      * @param view The view find by the Hit tester.
      *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
-     * @param Point Center point of the pinch in the head unit's coordinate system
+     * @param point Center point of the pinch in the head unit's coordinate system
      */
-    void onPinchEnd(View view, TouchCoord Point);
+    void onPinchEnd(View view, TouchCoord point);
 
     /**
      * Pinch canceled
      *
-     * @param Point Center point of the pinch in the head unit's coordinate system
+     * @param point Center point of the pinch in the head unit's coordinate system
      */
-    void onPinchCanceled(TouchCoord Point);
+    void onPinchCanceled(TouchCoord point);
 }

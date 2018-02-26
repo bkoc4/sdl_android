@@ -1,5 +1,7 @@
 package com.smartdevicelink.streaming.touch;
 
+import android.os.Handler;
+
 import com.smartdevicelink.proxy.rpc.OnTouchEvent;
 import com.smartdevicelink.proxy.rpc.TouchCoord;
 import com.smartdevicelink.proxy.rpc.TouchEvent;
@@ -16,10 +18,6 @@ public class SDLTouchManager {
 
     SDLTouchManagerListener mCallback;
 
-    public void setSDLTouchManagerDelegate(SDLTouchManagerListener callback){
-        this.mCallback = callback;
-    }
-
     private enum SDLPerformingTouchType {
         SDLPerformingTouchTypeNone,
         SDLPerformingTouchTypeSingleTouch,
@@ -34,7 +32,7 @@ public class SDLTouchManager {
     private TouchCoord lastNotifiedTouchLocation;
     private SDLPinchGesture currentPinchGesture;
     private double previousPinchDistance;
-    private Timer singleTapTimer;
+    private Handler singleTapTimer;
     private TouchEvent singleTapTouchEvent;
 
     //Constants (Please see the Constructor for the values)
@@ -46,8 +44,10 @@ public class SDLTouchManager {
     public boolean touchEnabled;
 
 
-    public SDLTouchManager(){
+    public SDLTouchManager(SDLTouchManagerListener callback){
 
+        singleTapTimer = new Handler();
+        this.mCallback = callback;
         movementTimeThreshold = 50;
         tapTimeThreshold = 400;
         tapDistanceThreshold = 50;
@@ -224,7 +224,7 @@ public class SDLTouchManager {
                 break;
 
             case SDLPerformingTouchTypeSingleTouch:
-                if (singleTapTimer==null){
+                if (singleTapTouchEvent==null){
                     sdl_initializeSingleTapTimerAtPoint(currentTouchCoord);
                     singleTapTouchEvent = touchEvent;
                 }else{
@@ -268,9 +268,8 @@ public class SDLTouchManager {
      *  @param touchEvent    Gesture information
      */
     private void sdl_handleTouchCanceled(TouchEvent touchEvent){
-        if (singleTapTimer !=null){
-            singleTapTimer.cancel();
-            singleTapTimer=null;
+        if (singleTapTouchEvent !=null){
+            singleTapTimer.removeCallbacksAndMessages(null);
         }
         switch (performingTouchType){
             case SDLPerformingTouchTypeMultiTouch:
@@ -318,26 +317,24 @@ public class SDLTouchManager {
      * @param point  Screen coordinates of the tap gesture
      */
     private void sdl_initializeSingleTapTimerAtPoint(final TouchCoord point){
-        singleTapTimer = new Timer();
-        singleTapTimer.schedule(new TimerTask() {
+        singleTapTimer.postDelayed(new Runnable() {
             @Override
             public void run() {
                 //TODO: Add UI Hit tester here
                 mCallback.onSingleTapReceive(null, point);
                 singleTapTouchEvent = null;
             }
-        }, tapTimeThreshold);
+        },tapTimeThreshold);
     }
 
     /**
      *  Cancels a tap gesture timer
      */
     private void sdl_cancelSingleTapTimer(){
-        if (singleTapTimer==null){
+        if (singleTapTouchEvent == null){
             return;
         }
-        singleTapTimer.cancel();
-        singleTapTimer = null;
+        singleTapTimer.removeCallbacksAndMessages(null);
     }
 
 }
