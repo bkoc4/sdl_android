@@ -53,7 +53,7 @@ public class SDLPinchGesture {
     public TouchCoord getCenter() {
         if ((center.getX()==noneTouchCoord.getX()) && (center.getY()==noneTouchCoord.getY())){
             center.setX((firstTouch.getX()+secondTouch.getX())/2);
-            center.setY((firstTouch.getX()+secondTouch.getX())/2);
+            center.setY((firstTouch.getY()+secondTouch.getY())/2);
         }
         return center;
     }

@@ -52,7 +52,7 @@ public interface SDLTouchManagerListener {
      *
      * @param point Location of the panning start point in the head unit's coordinate system.
      */
-    void onPaningStart(View view, TouchCoord point);
+    void onPanningStart(View view, TouchCoord point);
 
     /**
      * Panning ended

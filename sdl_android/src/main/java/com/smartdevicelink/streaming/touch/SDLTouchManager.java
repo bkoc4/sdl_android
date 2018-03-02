@@ -7,9 +7,6 @@ import com.smartdevicelink.proxy.rpc.TouchCoord;
 import com.smartdevicelink.proxy.rpc.TouchEvent;
 import com.smartdevicelink.proxy.rpc.enums.TouchType;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 /**
  * Created by Burak on 19.02.2018.
  */
@@ -52,8 +49,9 @@ public class SDLTouchManager {
         tapTimeThreshold = 400;
         tapDistanceThreshold = 50;
         touchEnabled = true;
-        syncedPanningEnabled = true;
+        syncedPanningEnabled = false;//true;
         maximumNumberOfTouches = 2;
+        performingTouchType = SDLPerformingTouchType.SDLPerformingTouchTypeNone;
 
     }
 
@@ -61,7 +59,7 @@ public class SDLTouchManager {
         sdl_cancelSingleTapTimer();
     }
 
-    private void syncFrame(){
+    public void syncFrame(){
         if (!touchEnabled || mCallback==null){
             return;
         }
@@ -151,7 +149,7 @@ public class SDLTouchManager {
      */
     private void sdl_handleTouchMoved(TouchEvent touchEvent){
 
-        if ((touchEvent.getTimestamps().get(0)-previousTouchEvent.getTimestamps().get(0) > movementTimeThreshold) ||
+        if ((touchEvent.getTimestamps().get(0)-previousTouchEvent.getTimestamps().get(0) <= movementTimeThreshold) &&
                 !syncedPanningEnabled){
             return;
         }
@@ -179,7 +177,8 @@ public class SDLTouchManager {
 
                 performingTouchType= SDLPerformingTouchType.SDLPerformingTouchTypePanningTouch;
                 //TODO: Add UI Hit tester here
-                mCallback.onPaningStart(null, currentPinchGesture.getCenter());
+                mCallback.onPanningStart(null, currentTouchCoord);
+                sdl_cancelSingleTapTimer();
                 break;
 
             case SDLPerformingTouchTypePanningTouch:
