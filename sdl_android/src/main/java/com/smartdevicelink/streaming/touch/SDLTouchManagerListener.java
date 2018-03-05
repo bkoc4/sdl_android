@@ -28,6 +28,15 @@ public interface SDLTouchManagerListener {
     void onDoubleTapReceive(View view, TouchCoord point);
 
     /**
+     * A long touch was received
+     *
+     * @param view The view find by the Hit tester.
+     *             Note In the current version of the sdl library the hit tester is not implemented therefore the view will always be null
+     * @param point The point where long touch is occurred.
+     */
+    void onLongTouchReceive(View view, TouchCoord point);
+
+    /**
      * A panning action is received. It will be updated once the
      *
      * @param view The view find by the Hit tester.

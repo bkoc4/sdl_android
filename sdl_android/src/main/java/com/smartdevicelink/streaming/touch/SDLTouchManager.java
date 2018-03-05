@@ -29,8 +29,9 @@ public class SDLTouchManager {
     private TouchCoord lastNotifiedTouchLocation;
     private SDLPinchGesture currentPinchGesture;
     private double previousPinchDistance;
-    private Handler singleTapTimer;
     private TouchEvent singleTapTouchEvent;
+    private Handler longTouchTimer;
+    private Handler singleTapTimer;
 
     //Constants (Please see the Constructor for the values)
     private int maximumNumberOfTouches;
@@ -43,6 +44,7 @@ public class SDLTouchManager {
 
     public SDLTouchManager(SDLTouchManagerListener callback){
 
+        longTouchTimer = new Handler();
         singleTapTimer = new Handler();
         this.mCallback = callback;
         movementTimeThreshold = 50;
@@ -130,9 +132,11 @@ public class SDLTouchManager {
         switch (touchEvent.getId()){
             case 0: //First Finger
                 previousTouch = touch;
+                sdl_initializeLongTouchTimer(touch);
                 break;
 
             case 1: //Second Finger
+                sdl_cancelLongTouchTimer();
                 performingTouchType = SDLPerformingTouchType.SDLPerformingTouchTypeMultiTouch;
                 currentPinchGesture = new SDLPinchGesture(previousTouch,touch);
                 previousPinchDistance = currentPinchGesture.getDistance();
@@ -179,6 +183,7 @@ public class SDLTouchManager {
                 //TODO: Add UI Hit tester here
                 mCallback.onPanningStart(null, currentTouchCoord);
                 sdl_cancelSingleTapTimer();
+                sdl_cancelLongTouchTimer();
                 break;
 
             case SDLPerformingTouchTypePanningTouch:
@@ -223,8 +228,9 @@ public class SDLTouchManager {
                 break;
 
             case SDLPerformingTouchTypeSingleTouch:
+                sdl_cancelLongTouchTimer();
                 if (singleTapTouchEvent==null){
-                    sdl_initializeSingleTapTimerAtPoint(currentTouchCoord);
+                    sdl_initializeSingleTapTimer(currentTouchCoord);
                     singleTapTouchEvent = touchEvent;
                 }else{
                     sdl_cancelSingleTapTimer();
@@ -267,9 +273,8 @@ public class SDLTouchManager {
      *  @param touchEvent    Gesture information
      */
     private void sdl_handleTouchCanceled(TouchEvent touchEvent){
-        if (singleTapTouchEvent !=null){
-            singleTapTimer.removeCallbacksAndMessages(null);
-        }
+        sdl_cancelLongTouchTimer();
+        sdl_cancelSingleTapTimer();
         switch (performingTouchType){
             case SDLPerformingTouchTypeMultiTouch:
                 sdl_setMultiTouchFingerTouchForTouch(touchEvent);
@@ -315,7 +320,7 @@ public class SDLTouchManager {
      *
      * @param point  Screen coordinates of the tap gesture
      */
-    private void sdl_initializeSingleTapTimerAtPoint(final TouchCoord point){
+    private void sdl_initializeSingleTapTimer(final TouchCoord point){
         singleTapTimer.postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -336,4 +341,19 @@ public class SDLTouchManager {
         singleTapTimer.removeCallbacksAndMessages(null);
     }
 
+    private void sdl_initializeLongTouchTimer(final TouchCoord point){
+        longTouchTimer.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                //TODO: Add UI Hit tester here
+                mCallback.onLongTouchReceive(null, point);
+                performingTouchType = SDLPerformingTouchType.SDLPerformingTouchTypeNone;
+            }
+        },tapTimeThreshold);
+    }
+
+
+    private void sdl_cancelLongTouchTimer(){
+        longTouchTimer.removeCallbacksAndMessages(null);
+    }
 }
