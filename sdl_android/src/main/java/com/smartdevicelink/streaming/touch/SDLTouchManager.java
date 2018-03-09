@@ -2,10 +2,15 @@ package com.smartdevicelink.streaming.touch;
 
 import android.os.Handler;
 
+import com.smartdevicelink.proxy.interfaces.IVideoStreamListener;
 import com.smartdevicelink.proxy.rpc.OnTouchEvent;
 import com.smartdevicelink.proxy.rpc.TouchCoord;
 import com.smartdevicelink.proxy.rpc.TouchEvent;
 import com.smartdevicelink.proxy.rpc.enums.TouchType;
+
+import java.nio.ByteBuffer;
+
+import javax.crypto.spec.IvParameterSpec;
 
 /**
  * Created by Burak on 19.02.2018.
@@ -13,7 +18,7 @@ import com.smartdevicelink.proxy.rpc.enums.TouchType;
 
 public class SDLTouchManager {
 
-    SDLTouchManagerListener mCallback;
+    private SDLTouchManagerListener mCallback;
 
     private enum SDLPerformingTouchType {
         SDLPerformingTouchTypeNone,
@@ -33,14 +38,19 @@ public class SDLTouchManager {
     private Handler longTouchTimer;
     private Handler singleTapTimer;
 
+    private static SDLTouchManager currentTouchManager;
+
     //Constants (Please see the Constructor for the values)
     private int maximumNumberOfTouches;
-    private long movementTimeThreshold; //millisecond
-    private long tapTimeThreshold; //milliseconds
-    private long tapDistanceThreshold;
+    public long movementTimeThreshold; //millisecond
+    public long tapTimeThreshold; //milliseconds
+    public long tapDistanceThreshold;
     public boolean syncedPanningEnabled;
     public boolean touchEnabled;
 
+    public static SDLTouchManager getCurrentTouchManager(){
+        return currentTouchManager;
+    }
 
     public SDLTouchManager(SDLTouchManagerListener callback){
 
@@ -51,9 +61,11 @@ public class SDLTouchManager {
         tapTimeThreshold = 400;
         tapDistanceThreshold = 50;
         touchEnabled = true;
-        syncedPanningEnabled = false;//true;
+        syncedPanningEnabled = true;
         maximumNumberOfTouches = 2;
         performingTouchType = SDLPerformingTouchType.SDLPerformingTouchTypeNone;
+
+        currentTouchManager = this;
 
     }
 
@@ -259,8 +271,8 @@ public class SDLTouchManager {
                 break;
         }
 
-        previousTouchEvent = null;
-        previousTouch = null;
+        //previousTouchEvent = null;
+        //previousTouch = null;
         performingTouchType = SDLPerformingTouchType.SDLPerformingTouchTypeNone;
 
     }
@@ -356,4 +368,5 @@ public class SDLTouchManager {
     private void sdl_cancelLongTouchTimer(){
         longTouchTimer.removeCallbacksAndMessages(null);
     }
+
 }

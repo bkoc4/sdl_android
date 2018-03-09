@@ -12,6 +12,7 @@ import com.smartdevicelink.protocol.ProtocolMessage;
 import com.smartdevicelink.protocol.enums.SessionType;
 import com.smartdevicelink.proxy.interfaces.IAudioStreamListener;
 import com.smartdevicelink.proxy.interfaces.IVideoStreamListener;
+import com.smartdevicelink.streaming.touch.SDLTouchManager;
 
 public class StreamPacketizer extends AbstractPacketizer implements IVideoStreamListener, IAudioStreamListener, Runnable{
 
@@ -172,6 +173,9 @@ public class StreamPacketizer extends AbstractPacketizer implements IVideoStream
 	public void sendFrame(byte[] data, int offset, int length, long presentationTimeUs)
 			throws ArrayIndexOutOfBoundsException {
 		sendArrayData(data, offset, length);
+		if (SDLTouchManager.getCurrentTouchManager()!=null) {
+            SDLTouchManager.getCurrentTouchManager().syncFrame();
+        }
 	}
 
 	/**
@@ -182,6 +186,9 @@ public class StreamPacketizer extends AbstractPacketizer implements IVideoStream
 	@Override
 	public void sendFrame(ByteBuffer data, long presentationTimeUs) {
 		sendByteBufferData(data);
+        if (SDLTouchManager.getCurrentTouchManager()!=null) {
+            SDLTouchManager.getCurrentTouchManager().syncFrame();
+        }
 	}
 
 	/**
