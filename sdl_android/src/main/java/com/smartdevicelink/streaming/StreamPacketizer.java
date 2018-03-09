@@ -174,7 +174,9 @@ public class StreamPacketizer extends AbstractPacketizer implements IVideoStream
 			throws ArrayIndexOutOfBoundsException {
 		sendArrayData(data, offset, length);
 		if (SDLTouchManager.getCurrentTouchManager()!=null) {
-            SDLTouchManager.getCurrentTouchManager().syncFrame();
+			if(SDLTouchManager.getCurrentTouchManager().syncedPanningEnabled && SDLTouchManager.getCurrentTouchManager().touchEnabled) {
+				SDLTouchManager.getCurrentTouchManager().syncFrame();
+			}
         }
 	}
 
@@ -186,9 +188,11 @@ public class StreamPacketizer extends AbstractPacketizer implements IVideoStream
 	@Override
 	public void sendFrame(ByteBuffer data, long presentationTimeUs) {
 		sendByteBufferData(data);
-        if (SDLTouchManager.getCurrentTouchManager()!=null) {
-            SDLTouchManager.getCurrentTouchManager().syncFrame();
-        }
+		if (SDLTouchManager.getCurrentTouchManager()!=null) {
+			if(SDLTouchManager.getCurrentTouchManager().syncedPanningEnabled && SDLTouchManager.getCurrentTouchManager().touchEnabled) {
+				SDLTouchManager.getCurrentTouchManager().syncFrame();
+			}
+		}
 	}
 
 	/**
